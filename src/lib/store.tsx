@@ -1,13 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { AppState, User } from './types'
 import { seed } from './seed'
 
-const KEY = 'layers-poc-v1'
+export const STORAGE_KEY = 'layers-poc-v1'
 
 function load(): AppState {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return JSON.parse(raw) as AppState
   } catch {
     // storage unavailable or corrupt: fall back to seed
@@ -18,7 +18,7 @@ function load(): AppState {
 interface Store {
   state: AppState
   me: User
-  /** Mutate a cloned draft; the result replaces state and is persisted. */
+  /** Mutate a cloned draft synchronously; the result replaces state and is persisted. */
   mutate: (fn: (draft: AppState) => void) => void
   reset: () => void
   user: (id?: string) => User | undefined
@@ -28,24 +28,29 @@ const Ctx = createContext<Store | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(load)
+  // Latest state, updated synchronously so callers can read ids created inside `mutate`
+  // (e.g. open a thread, then navigate to it) and back-to-back mutates compose.
+  const latest = useRef(state)
 
   useEffect(() => {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
     } catch {
       // quota or private mode; state still lives in memory
     }
   }, [state])
 
   const mutate = useCallback((fn: (draft: AppState) => void) => {
-    setState(prev => {
-      const draft = structuredClone(prev)
-      fn(draft)
-      return draft
-    })
+    const draft = structuredClone(latest.current)
+    fn(draft)
+    latest.current = draft
+    setState(draft)
   }, [])
 
-  const reset = useCallback(() => setState(structuredClone(seed)), [])
+  const reset = useCallback(() => {
+    latest.current = structuredClone(seed)
+    setState(latest.current)
+  }, [])
 
   const value = useMemo<Store>(() => {
     const byId = new Map(state.users.map(u => [u.id, u]))
