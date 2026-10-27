@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useStore } from '../lib/store'
-import { unreadCount } from '../lib/selectors'
+import { newHires, seniors, unreadCount } from '../lib/selectors'
+import { forRole } from '../lib/permissions'
 import { Avatar, Icon } from './ui'
 
 export function Layout() {
@@ -11,16 +12,16 @@ export function Layout() {
   const loc = useLocation()
   const nav = useNavigate()
   const unread = unreadCount(state, me.id)
-  const senior = me.role === 'senior'
+  const label = (senior: string, newHire: string) => forRole(me, { senior, new: newHire })
 
   useEffect(() => setOpen(false), [loc.pathname])
 
   const links = [
-    { to: '/', icon: 'home', label: senior ? 'Dashboard' : 'Home', end: true },
-    { to: '/plans', icon: 'plan', label: senior ? 'Plans' : 'My plan' },
+    { to: '/', icon: 'home', label: label('Dashboard', 'Home'), end: true },
+    { to: '/plans', icon: 'plan', label: label('Plans', 'My plan') },
     { to: '/library', icon: 'book', label: 'Library' },
     { to: '/codebase', icon: 'code', label: 'Codebase' },
-    { to: '/tasks', icon: 'task', label: senior ? 'Starter tasks' : 'Tasks' },
+    { to: '/tasks', icon: 'task', label: label('Starter tasks', 'Tasks') },
     { to: '/messages', icon: 'chat', label: 'Messages', count: unread },
   ]
 
@@ -46,10 +47,10 @@ export function Layout() {
             onChange={e => { mutate(s => { s.currentUserId = e.target.value }); nav('/') }}
           >
             <optgroup label="Senior engineers">
-              {state.users.filter(u => u.role === 'senior').map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              {seniors(state).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </optgroup>
             <optgroup label="New engineers">
-              {state.users.filter(u => u.role === 'new').map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              {newHires(state).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </optgroup>
           </select>
           <div className="row">

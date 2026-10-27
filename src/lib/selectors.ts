@@ -1,4 +1,8 @@
 import type { AppState, Plan, PlanItem, Thread, User } from './types'
+import { can } from './permissions'
+
+export const newHires = (state: AppState) => state.users.filter(u => u.role === 'new')
+export const seniors = (state: AppState) => state.users.filter(u => u.role === 'senior')
 
 export function planItems(plan: Plan): PlanItem[] {
   return plan.phases.flatMap(p => p.items)
@@ -15,9 +19,9 @@ export function planProgress(state: AppState, plan: Plan, userId: string) {
 }
 
 export function plansFor(state: AppState, user: User) {
-  return user.role === 'new'
-    ? state.plans.filter(p => p.assigneeIds.includes(user.id))
-    : state.plans
+  return can(user, 'plan.viewAll')
+    ? state.plans
+    : state.plans.filter(p => p.assigneeIds.includes(user.id))
 }
 
 export function nextUp(state: AppState, user: User, n = 4) {
@@ -51,5 +55,5 @@ export function unreadCount(state: AppState, userId: string) {
 }
 
 export function docsFor(state: AppState, user: User) {
-  return state.docs.filter(d => user.role === 'senior' || !d.tracks.length || d.tracks.includes(user.track))
+  return state.docs.filter(d => can(user, 'doc.viewAllTracks') || !d.tracks.length || d.tracks.includes(user.track))
 }

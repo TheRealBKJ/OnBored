@@ -1,11 +1,11 @@
 import { Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
-import { Home } from './pages/Home'
-import { Plans, PlanDetail } from './pages/Plans'
-import { Library, DocDetail } from './pages/Library'
-import { Codebase } from './pages/Codebase'
-import { Tasks } from './pages/Tasks'
-import { Messages } from './pages/Messages'
+import { Home } from './features/home'
+import { Plans, PlanDetail } from './features/plans'
+import { Library, DocDetail } from './features/library'
+import { Codebase } from './features/codebase'
+import { Tasks } from './features/tasks'
+import { Messages } from './features/messages'
 
 export function AppRoutes() {
   return (

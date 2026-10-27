@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { answerWhy } from '../lib/ask'
 import type { Answer } from '../lib/ask'
 import { useStore } from '../lib/store'
-import { docsFor } from '../lib/selectors'
+import { docsFor, seniors } from '../lib/selectors'
+import { can } from '../lib/permissions'
 import { openThread } from '../lib/actions'
 import { Icon, KindBadge } from './ui'
 
@@ -26,7 +27,7 @@ export function AskWhy({ compact = false }: { compact?: boolean }) {
   const askPerson = () => {
     const cite = ans?.cites[0]
     const area = state.areas.find(a => a.id === cite?.areaId)
-    const to = area?.ownerId ?? state.users.find(u => u.role === 'senior' && u.track === me.track)?.id ?? state.users.find(u => u.role === 'senior')!.id
+    const to = area?.ownerId ?? seniors(state).find(u => u.track === me.track)?.id ?? seniors(state)[0].id
     let id = ''
     mutate(s => { id = openThread(s, me.id, to, asked.slice(0, 60), area ? { kind: 'area', id: area.id } : undefined, asked) })
     nav(`/messages/${id}`)
@@ -64,7 +65,7 @@ export function AskWhy({ compact = false }: { compact?: boolean }) {
               </div>
             )}
             <div className="row wrap" style={{ marginTop: 12 }}>
-              {me.role === 'new' && <button className="btn sm" onClick={askPerson}><Icon name="chat" size={13} />{ans.confident ? 'Still unclear? Ask the owner' : 'Ask the area owner'}</button>}
+              {can(me, 'ask.routeToOwner') && <button className="btn sm" onClick={askPerson}><Icon name="chat" size={13} />{ans.confident ? 'Still unclear? Ask the owner' : 'Ask the area owner'}</button>}
               <button className="btn ghost sm" onClick={() => { setAns(null); setQ('') }}>Clear</button>
             </div>
           </div>
