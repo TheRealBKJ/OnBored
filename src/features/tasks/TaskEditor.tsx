@@ -17,13 +17,13 @@ export function TaskEditor({ onClose, existing }: { onClose: () => void; existin
   }
   return (
     <Modal title={existing ? 'Edit task' : 'Recommend a starter task'} onClose={onClose} footer={<>
-      {existing && <button className="btn danger" style={{ marginRight: 'auto' }} onClick={() => { mutate(s => { s.tasks = s.tasks.filter(x => x.id !== t.id) }); onClose() }}>Delete</button>}
+      {existing && <button className="btn danger mr-auto" onClick={() => { mutate(s => { s.tasks = s.tasks.filter(x => x.id !== t.id) }); onClose() }}>Delete</button>}
       <button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" disabled={!t.title} onClick={save}>Save</button></>}>
       <Field label="Title"><input className="input" autoFocus value={t.title} onChange={e => set('title', e.target.value)} placeholder="Add retry metrics to the payout job" /></Field>
       <Field label="What to do"><textarea className="textarea" value={t.description} onChange={e => set('description', e.target.value)} /></Field>
       <Field label="What they'll learn by doing it"><input className="input" value={t.learns} onChange={e => set('learns', e.target.value)} placeholder="How billing jobs are scheduled and retried" /></Field>
-      <div className="grid g2">
-        <Field label="File (optional)"><input className="input mono" value={t.file ?? ''} onChange={e => set('file', e.target.value || undefined)} /></Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="File (optional)"><input className="input font-mono" value={t.file ?? ''} onChange={e => set('file', e.target.value || undefined)} /></Field>
         <Field label="Area"><select className="select" value={t.areaId ?? ''} onChange={e => set('areaId', e.target.value || undefined)}><option value="">None</option>{state.areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></Field>
         <Field label="Difficulty"><select className="select" value={t.difficulty} onChange={e => set('difficulty', Number(e.target.value) as 1 | 2 | 3)}><option value={1}>Easy</option><option value={2}>Medium</option><option value={3}>Stretch</option></select></Field>
         <Field label="Estimate"><input className="input" value={t.estimate} onChange={e => set('estimate', e.target.value)} /></Field>

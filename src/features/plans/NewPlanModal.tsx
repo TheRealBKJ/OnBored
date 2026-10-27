@@ -33,7 +33,7 @@ export function NewPlanModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="New onboarding plan" onClose={onClose} footer={<><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={create}>Create plan</button></>}>
       <Field label="Title"><input className="input" autoFocus value={title} onChange={e => setTitle(e.target.value)} placeholder="Backend onboarding: Billing" /></Field>
-      <div className="grid g2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Track (role)"><select className="select" value={track} onChange={e => setTrack(e.target.value)}>{TRACKS.map(t => <option key={t}>{t}</option>)}</select></Field>
         <Field label="Start from">
           <select className="select" value={from} onChange={e => setFrom(e.target.value)}>

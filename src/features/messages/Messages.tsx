@@ -32,7 +32,7 @@ export function Messages() {
   }, [active, state, me.id, mutate])
 
   return (
-    <div className="page" style={{ maxWidth: 1240 }}>
+    <div className="page max-w-310">
       <div className="page-head">
         <div><h1>Messages</h1><p>{forRole(me, { senior: 'Answer once: save good answers as records so the next hire finds them.', new: 'Ask the people who built it. Answers worth keeping get saved to the Library.' })}</p></div>
         <button className="btn primary" onClick={() => setComposing({})}><Icon name="plus" />New message</button>
@@ -45,14 +45,14 @@ export function Messages() {
             const last = t.messages[t.messages.length - 1]
             const unread = isUnread(state, t, me.id)
             return (
-              <Link key={t.id} to={`/messages/${t.id}`} className="list-item" style={{ background: t.id === active?.id ? 'var(--surface-2)' : undefined }}>
+              <Link key={t.id} to={`/messages/${t.id}`} className={`list-row ${t.id === active?.id ? 'bg-surface-2' : ''}`}>
                 <Avatar user={other} size={32} />
-                <div className="grow">
-                  <div className="row-between"><span className="truncate" style={{ fontWeight: unread ? 700 : 550 }}>{other?.name}</span><span className="tiny faint">{last ? ago(last.at) : ''}</span></div>
-                  <div className="tiny truncate" style={{ fontWeight: 550 }}>{t.subject}</div>
-                  <div className="tiny muted truncate">{last?.body ?? 'No messages yet'}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2"><span className={`truncate ${unread ? 'font-bold' : 'font-[550]'}`}>{other?.name}</span><span className="text-tiny text-faint">{last ? ago(last.at) : ''}</span></div>
+                  <div className="text-tiny truncate font-[550]">{t.subject}</div>
+                  <div className="text-tiny text-muted truncate">{last?.body ?? 'No messages yet'}</div>
                 </div>
-                {unread && <span style={{ width: 8, height: 8, borderRadius: 99, background: 'var(--accent)', marginTop: 6 }} />}
+                {unread && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-accent" />}
               </Link>
             )
           })}

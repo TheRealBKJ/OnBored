@@ -44,7 +44,7 @@ export function DocEditor({ onClose, existing, defaults }: { onClose: () => void
 
   return (
     <Modal title={existing ? 'Edit document' : 'Add to the library'} onClose={onClose}
-      footer={<><span className="small" style={{ color: 'var(--danger)', marginRight: 'auto' }}>{err}</span><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={save}>{existing ? 'Save' : 'Publish'}</button></>}>
+      footer={<><span className="text-small mr-auto text-danger">{err}</span><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={save}>{existing ? 'Save' : 'Publish'}</button></>}>
       <div className="chips">
         {(['decision', 'guide', 'link', 'file'] as DocKind[]).concat(d.kind === 'why' ? ['why'] : []).map(k => (
           <button key={k} className={`chip ${d.kind === k ? 'active' : ''}`} onClick={() => set('kind', k)}>
@@ -57,8 +57,8 @@ export function DocEditor({ onClose, existing, defaults }: { onClose: () => void
         <div className="dropzone" onClick={() => fileRef.current?.click()}
           onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); onFile(e.dataTransfer.files[0]) }}>
           <Icon name="file" size={20} />
-          <div style={{ marginTop: 6 }}>{d.fileName ? <strong>{d.fileName}</strong> : 'Drop a file or click to choose'}</div>
-          <div className="tiny">Markdown and text files are readable in-app. Others are stored by name.</div>
+          <div className="mt-1.5">{d.fileName ? <strong>{d.fileName}</strong> : 'Drop a file or click to choose'}</div>
+          <div className="text-tiny">Markdown and text files are readable in-app. Others are stored by name.</div>
           <input ref={fileRef} type="file" hidden onChange={e => onFile(e.target.files?.[0])} />
         </div>
       )}
@@ -73,19 +73,19 @@ export function DocEditor({ onClose, existing, defaults }: { onClose: () => void
       {d.kind === 'link' && <Field label="URL"><input className="input" value={d.url ?? ''} onChange={e => set('url', e.target.value)} placeholder="https://" /></Field>}
       <Field label="One-line summary"><input className="input" value={d.summary} onChange={e => set('summary', e.target.value)} /></Field>
       <Field label={decisionLike ? 'Why: the reasoning, constraints and tradeoffs' : 'Body'}>
-        <textarea className="textarea" style={{ minHeight: 120 }} value={d.body} onChange={e => set('body', e.target.value)} />
+        <textarea className="textarea min-h-30" value={d.body} onChange={e => set('body', e.target.value)} />
       </Field>
       {decisionLike && (
         <>
           <Field label="Alternatives considered (one per line)">
-            <textarea className="textarea" style={{ minHeight: 60 }} value={(d.alternatives ?? []).join('\n')} onChange={e => set('alternatives', e.target.value.split('\n'))} />
+            <textarea className="textarea min-h-15" value={(d.alternatives ?? []).join('\n')} onChange={e => set('alternatives', e.target.value.split('\n'))} />
           </Field>
           <Field label="Sources: design docs, tickets, PRs, postmortems (one per line)">
-            <textarea className="textarea" style={{ minHeight: 60 }} value={(d.sources ?? []).map(s => s.label).join('\n')} onChange={e => set('sources', e.target.value.split('\n').map(label => ({ label })))} />
+            <textarea className="textarea min-h-15" value={(d.sources ?? []).map(s => s.label).join('\n')} onChange={e => set('sources', e.target.value.split('\n').map(label => ({ label })))} />
           </Field>
         </>
       )}
-      <div className="grid g2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Codebase area">
           <select className="select" value={d.areaId ?? ''} onChange={e => set('areaId', e.target.value || undefined)}>
             <option value="">None</option>

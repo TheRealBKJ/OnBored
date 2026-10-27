@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { currentPath, renderApp, savedState, SENIOR } from '../../test/render'
 
-const list = () => within(document.querySelector('.split .card .list') as HTMLElement)
+const list = () => within(screen.getByTestId('doc-list') as HTMLElement)
 
 describe('Library', () => {
   it('filters docs to the hire\'s track', () => {

@@ -37,13 +37,13 @@ export function Library() {
         {can(me, 'doc.create') && <button className="btn primary" onClick={() => setParams({ new: '1' })}><Icon name="plus" />Add document</button>}
       </div>
 
-      <div className="split">
-        <div className="stack">
-          <div className="row wrap">
-            <div className="grow" style={{ minWidth: 220, position: 'relative' }}>
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="min-w-0 flex-1 relative min-w-55">
               <input className="input" value={q} onChange={e => setQ(e.target.value)} placeholder="Search titles, questions, tags…" />
             </div>
-            <select className="select" style={{ width: 'auto' }} value={area} onChange={e => setArea(e.target.value)}>
+            <select className="select w-auto" value={area} onChange={e => setArea(e.target.value)}>
               <option value="">All areas</option>
               {state.areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
@@ -52,20 +52,20 @@ export function Library() {
             {KINDS.map(k => <button key={k.k} className={`chip ${kind === k.k ? 'active' : ''}`} onClick={() => setKind(k.k)}>{k.label}</button>)}
           </div>
           <div className="card">
-            <div className="list">
+            <div className="list" data-testid="doc-list">
               {docs.length === 0 && <Empty>No documents match.</Empty>}
               {docs.map(d => {
                 const a = state.areas.find(a => a.id === d.areaId)
                 return (
-                  <Link key={d.id} to={`/library/${d.id}`} className="list-item">
-                    <span style={{ color: 'var(--muted)', marginTop: 2 }}><Icon name={d.kind === 'link' ? 'link' : d.kind === 'file' ? 'file' : d.kind === 'guide' ? 'book' : 'bookmark'} /></span>
-                    <div className="grow">
-                      <div style={{ fontWeight: 600 }}>{d.title}</div>
-                      <div className="small muted" style={{ margin: '2px 0 6px' }}>{d.question && d.kind !== 'why' ? d.question : d.summary}</div>
-                      <div className="row wrap tiny muted">
+                  <Link key={d.id} to={`/library/${d.id}`} className="list-row">
+                    <span className="mt-0.5 text-muted"><Icon name={d.kind === 'link' ? 'link' : d.kind === 'file' ? 'file' : d.kind === 'guide' ? 'book' : 'bookmark'} /></span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold">{d.title}</div>
+                      <div className="text-small text-muted mt-0.5 mb-1.5">{d.question && d.kind !== 'why' ? d.question : d.summary}</div>
+                      <div className="flex items-center gap-2 flex-wrap text-tiny text-muted">
                         <KindBadge kind={d.kind} />
-                        {a && <span className="badge outline">{a.name}</span>}
-                        {d.tracks.map(t => <span key={t} className="badge outline">{t}</span>)}
+                        {a && <span className="badge outlined">{a.name}</span>}
+                        {d.tracks.map(t => <span key={t} className="badge outlined">{t}</span>)}
                         <span>{user(d.authorId)?.name} · {ago(d.createdAt)}</span>
                         {!!d.views && <span>· read {d.views}×</span>}
                       </div>
@@ -76,10 +76,10 @@ export function Library() {
             </div>
           </div>
         </div>
-        <div className="stack">
+        <div className="flex flex-col gap-3">
           <AskWhy compact />
-          <div className="card card-pad small muted stack-sm">
-            <h3 style={{ color: 'var(--text)' }}>What goes here</h3>
+          <div className="card card-pad text-small text-muted flex flex-col gap-1.5">
+            <h3 className="text-ink">What goes here</h3>
             <p><strong>Decision records</strong>: the question, what was decided, what else was considered, and the sources.</p>
             <p><strong>Captured whys</strong>: answers seniors gave in Messages, saved so nobody has to ask twice.</p>
             <p><strong>Guides, links, files</strong>: setup docs, process, runbooks.</p>

@@ -27,11 +27,11 @@ export function SaveWhyModal({ thread, message, onClose }: { thread: Thread; mes
 
   return (
     <Modal title="Save as a why record" onClose={onClose} footer={<><button className="btn" onClick={onClose}>Cancel</button><button className="btn primary" onClick={save}>Save to Library</button></>}>
-      <p className="small muted">Clean it up a little. It becomes searchable in Ask why, cited to you and this conversation.</p>
+      <p className="text-small text-muted">Clean it up a little. It becomes searchable in Ask why, cited to you and this conversation.</p>
       <Field label="Title"><input className="input" value={title} onChange={e => setTitle(e.target.value)} /></Field>
       <Field label="The question"><input className="input" value={question} onChange={e => setQuestion(e.target.value)} /></Field>
-      <Field label="The answer (the why)"><textarea className="textarea" style={{ minHeight: 120 }} value={body} onChange={e => setBody(e.target.value)} /></Field>
-      <div className="grid g2">
+      <Field label="The answer (the why)"><textarea className="textarea min-h-30" value={body} onChange={e => setBody(e.target.value)} /></Field>
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Area"><select className="select" value={areaId} onChange={e => setAreaId(e.target.value)}><option value="">None</option>{state.areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></Field>
         <Field label="Tags"><input className="input" value={tags} onChange={e => setTags(e.target.value)} placeholder="billing, money" /></Field>
       </div>

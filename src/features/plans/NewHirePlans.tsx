@@ -13,7 +13,7 @@ export function NewHirePlans() {
     <div className="page">
       <div className="page-head"><div><h1>My plans</h1><p>Your onboarding, step by step.</p></div></div>
       {plans.length === 0 && <div className="card"><Empty>No plan assigned yet. Your senior engineer will add one.</Empty></div>}
-      <div className="grid g2">{plans.map(p => <PlanCard key={p.id} plan={p} />)}</div>
+      <div className="grid gap-4 sm:grid-cols-2">{plans.map(p => <PlanCard key={p.id} plan={p} />)}</div>
     </div>
   )
 }

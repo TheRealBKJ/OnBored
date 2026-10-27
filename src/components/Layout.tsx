@@ -40,7 +40,7 @@ export function Layout() {
         ))}
 
         <div className="sidebar-foot">
-          <div className="nav-section" style={{ padding: '0 2px' }}>Viewing as (demo)</div>
+          <div className="nav-section px-0.5 py-0">Viewing as (demo)</div>
           <select
             className="select"
             value={me.id}
@@ -53,14 +53,14 @@ export function Layout() {
               {newHires(state).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </optgroup>
           </select>
-          <div className="row">
+          <div className="flex items-center gap-2">
             <Avatar user={me} size={30} />
-            <div className="grow">
-              <div className="truncate" style={{ fontWeight: 600 }}>{me.name}</div>
-              <div className="tiny muted truncate">{me.title} · {me.team}</div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-semibold">{me.name}</div>
+              <div className="text-tiny text-muted truncate">{me.title} · {me.team}</div>
             </div>
           </div>
-          <div className="row tiny faint"><Icon name="lock" size={12} />Read-only access to code</div>
+          <div className="flex items-center gap-2 text-tiny text-faint"><Icon name="lock" size={12} />Read-only access to code</div>
           <button className="btn ghost sm" onClick={() => confirm('Reset all demo data?') && reset()}>Reset demo data</button>
         </div>
       </aside>
@@ -69,7 +69,7 @@ export function Layout() {
         <div className="mobile-bar">
           <button className="btn ghost sm" onClick={() => setOpen(o => !o)} aria-label="Menu"><Icon name="menu" /></button>
           <strong>Layers</strong>
-          <span className="grow" />
+          <span className="min-w-0 flex-1" />
           <Avatar user={me} size={26} />
         </div>
         <Outlet />

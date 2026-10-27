@@ -12,23 +12,23 @@ export function SeniorHome() {
   const reuse = myDocs.filter(d => d.kind === 'why' || d.kind === 'decision').reduce((n, d) => n + (d.views ?? 0), 0)
 
   return (
-    <div className="page stack" style={{ gap: 16 }}>
+    <div className="page flex flex-col gap-4">
       <div className="page-head">
         <div><h1>Good to see you, {me.name.split(' ')[0]}</h1><p>How your new engineers are ramping, and what they need from you.</p></div>
-        <div className="row wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link className="btn" to="/library?new=1"><Icon name="plus" />Add doc</Link>
           <Link className="btn primary" to="/plans?new=1"><Icon name="plus" />New plan</Link>
         </div>
       </div>
 
-      <div className="grid g4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card stat"><div className="v">{hires.length}</div><div className="l">New engineers ramping</div></div>
         <div className="card stat"><div className="v">{waiting.length}</div><div className="l">Questions waiting on you</div></div>
         <div className="card stat"><div className="v">{captured}</div><div className="l">"Why" answers captured</div></div>
         <div className="card stat"><div className="v">{reuse}</div><div className="l">Times your records were read</div></div>
       </div>
 
-      <div className="split">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="card">
           <div className="card-head"><h2>New engineers</h2></div>
           <div className="list">
@@ -38,19 +38,19 @@ export function SeniorHome() {
               const next = nextUp(state, h, 1)[0]
               const active = state.tasks.filter(t => t.assigneeId === h.id && t.status !== 'done').length
               return (
-                <div key={h.id} className="list-item" style={{ alignItems: 'center' }}>
+                <div key={h.id} className="list-row items-center">
                   <Avatar user={h} size={34} />
-                  <div className="grow">
-                    <div className="row-between">
-                      <span style={{ fontWeight: 600 }}>{h.name}</span>
-                      <span className="tiny muted">{h.title} · started {h.startDate ? ago(h.startDate) : '?'}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold">{h.name}</span>
+                      <span className="text-tiny text-muted">{h.title} · started {h.startDate ? ago(h.startDate) : '?'}</span>
                     </div>
                     {prog ? (
                       <>
-                        <div className="row" style={{ margin: '6px 0 4px' }}><div className="grow"><Progress value={prog.ratio} /></div><span className="tiny">{prog.completed}/{prog.total}</span></div>
-                        <div className="tiny muted truncate">{plan!.title} · {active} active task{active === 1 ? '' : 's'}{next && <> · next: {next.item.title}</>}</div>
+                        <div className="flex items-center gap-2 mt-1.5 mb-1"><div className="min-w-0 flex-1"><Progress value={prog.ratio} /></div><span className="text-tiny">{prog.completed}/{prog.total}</span></div>
+                        <div className="text-tiny text-muted truncate">{plan!.title} · {active} active task{active === 1 ? '' : 's'}{next && <> · next: {next.item.title}</>}</div>
                       </>
-                    ) : <div className="tiny muted">No plan yet. <Link to="/plans?new=1" style={{ textDecoration: 'underline' }}>Create one</Link></div>}
+                    ) : <div className="text-tiny text-muted">No plan yet. <Link to="/plans?new=1" className="underline">Create one</Link></div>}
                   </div>
                 </div>
               )
@@ -58,7 +58,7 @@ export function SeniorHome() {
           </div>
         </div>
 
-        <div className="stack" style={{ gap: 16 }}>
+        <div className="flex flex-col gap-4">
           <div className="card">
             <div className="card-head"><h2>Waiting on you</h2><Link className="btn sm" to="/messages">Messages</Link></div>
             <div className="list">
@@ -66,15 +66,15 @@ export function SeniorHome() {
               {waiting.map(t => {
                 const m = t.messages[t.messages.length - 1]
                 return (
-                  <Link key={t.id} to={`/messages/${t.id}`} className="list-item">
+                  <Link key={t.id} to={`/messages/${t.id}`} className="list-row">
                     <Avatar user={user(m.fromId)} size={26} />
-                    <div className="grow"><div style={{ fontWeight: 550 }} className="truncate">{t.subject}</div><div className="tiny muted truncate">{m.body}</div></div>
+                    <div className="min-w-0 flex-1"><div className="truncate font-[550]">{t.subject}</div><div className="text-tiny text-muted truncate">{m.body}</div></div>
                   </Link>
                 )
               })}
             </div>
           </div>
-          <div className="callout small">
+          <div className="callout text-small">
             <strong>Answer once.</strong> When you reply to a "why" question in Messages, save it as a record. The next hire who asks gets your answer from Ask why, with you cited.
           </div>
         </div>

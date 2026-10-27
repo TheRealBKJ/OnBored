@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { currentPath, renderApp, savedState, SENIOR, NEW_HIRE } from '../../test/render'
 
-const step = (title: string) => within(screen.getByText(title).closest('.list-item') as HTMLElement)
+const step = (title: string) => within(screen.getByText(title).closest('.list-row') as HTMLElement)
 
 describe('Plans (new engineer)', () => {
   it('opens the only assigned plan directly', () => {

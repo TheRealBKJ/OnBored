@@ -35,14 +35,14 @@ export function AskWhy({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="card">
-      <div className="card-pad stack">
-        <div className="row-between">
+      <div className="card-pad flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <h2 className="row"><Icon name="question" />Ask why</h2>
-            {!compact && <p className="small muted">Answers come only from records your team wrote, and always cite them.</p>}
+            <h2 className="flex items-center gap-2"><Icon name="question" />Ask why</h2>
+            {!compact && <p className="text-small text-muted">Answers come only from records your team wrote, and always cite them.</p>}
           </div>
         </div>
-        <form className="row" onSubmit={e => { e.preventDefault(); ask() }}>
+        <form className="flex items-center gap-2" onSubmit={e => { e.preventDefault(); ask() }}>
           <input className="input" value={q} onChange={e => setQ(e.target.value)} placeholder="Why was it built this way?" />
           <button className="btn primary" type="submit"><Icon name="search" />Ask</button>
         </form>
@@ -52,19 +52,19 @@ export function AskWhy({ compact = false }: { compact?: boolean }) {
           </div>
         )}
         {ans && (
-          <div className={`callout ${ans.confident ? 'ai' : ''}`} style={ans.confident ? undefined : { background: 'var(--surface-2)', color: 'var(--text)' }}>
-            <p style={{ marginBottom: 10 }}>{ans.text}</p>
+          <div className={`callout ${ans.confident ? 'ai' : 'plain'}`}>
+            <p className="mb-2.5">{ans.text}</p>
             {ans.cites.length > 0 && (
-              <div className="stack-sm">
-                <span className="tiny muted">{ans.confident ? 'Sources' : 'Closest records (not a direct answer)'}</span>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-tiny text-muted">{ans.confident ? 'Sources' : 'Closest records (not a direct answer)'}</span>
                 {ans.cites.map(d => (
-                  <Link key={d.id} to={`/library/${d.id}`} className="row small" style={{ textDecoration: 'underline' }}>
+                  <Link key={d.id} to={`/library/${d.id}`} className="flex items-center gap-2 text-small underline">
                     <KindBadge kind={d.kind} /> <span className="truncate">{d.title}</span>
                   </Link>
                 ))}
               </div>
             )}
-            <div className="row wrap" style={{ marginTop: 12 }}>
+            <div className="flex items-center gap-2 flex-wrap mt-3">
               {can(me, 'ask.routeToOwner') && <button className="btn sm" onClick={askPerson}><Icon name="chat" size={13} />{ans.confident ? 'Still unclear? Ask the owner' : 'Ask the area owner'}</button>}
               <button className="btn ghost sm" onClick={() => { setAns(null); setQ('') }}>Clear</button>
             </div>

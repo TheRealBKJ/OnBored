@@ -15,7 +15,7 @@ export function SeniorPlans() {
         <button className="btn primary" onClick={() => setParams({ new: '1' })}><Icon name="plus" />New plan</button>
       </div>
       {state.plans.length === 0 && <div className="card"><Empty>No plans yet.</Empty></div>}
-      <div className="grid g2">{state.plans.map(p => <PlanCard key={p.id} plan={p} />)}</div>
+      <div className="grid gap-4 sm:grid-cols-2">{state.plans.map(p => <PlanCard key={p.id} plan={p} />)}</div>
       {creating && <NewPlanModal onClose={() => setParams({})} />}
     </div>
   )
