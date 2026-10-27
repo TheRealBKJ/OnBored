@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore, uid, now } from '../../lib/store'
 import type { Doc, DocKind } from '../../lib/types'
 import { Field, Icon, Modal } from '../../components/ui'
-import { TRACKS } from '../plans/tracks'
+import { TRACKS } from '../../lib/tracks'
 
 const MAX_FILE = 512 * 1024 // keeps localStorage healthy in the POC
 

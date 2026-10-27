@@ -4,7 +4,7 @@ import { useStore, uid, now } from '../../lib/store'
 import { newHires } from '../../lib/selectors'
 import type { Plan } from '../../lib/types'
 import { Field, Modal } from '../../components/ui'
-import { TRACKS } from './tracks'
+import { TRACKS } from '../../lib/tracks'
 
 export function NewPlanModal({ onClose }: { onClose: () => void }) {
   const { state, me, mutate } = useStore()
