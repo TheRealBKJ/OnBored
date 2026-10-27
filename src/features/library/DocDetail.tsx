@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useStore, ago } from '../../lib/store'
-import { openThread } from '../../lib/actions'
+import { countRead, openThread } from '../../lib/actions'
+import { canSeeDoc, docsFor } from '../../lib/selectors'
 import { can } from '../../lib/permissions'
 import { Avatar, Empty, Icon, KindBadge } from '../../components/ui'
 import { DocEditor } from './DocEditor'
@@ -12,16 +13,20 @@ export function DocDetail() {
   const nav = useNavigate()
   const [editing, setEditing] = useState(false)
   const countsRead = can(me, 'doc.countRead')
-  const doc = state.docs.find(d => d.id === id)
+  const found = state.docs.find(d => d.id === id)
+  const doc = found && canSeeDoc(me, found) ? found : undefined
 
+  // countRead is idempotent per reader, so StrictMode's double effect and revisits don't inflate it.
+  const docId = doc?.id
   useEffect(() => {
-    if (id && countsRead) mutate(s => { const d = s.docs.find(d => d.id === id); if (d) d.views = (d.views ?? 0) + 1 })
-  }, [id, countsRead, mutate])
+    if (docId && countsRead) mutate(s => countRead(s, docId, me.id))
+  }, [docId, countsRead, me.id, mutate])
 
-  if (!doc) return <div className="page"><Empty>Document not found. <Link to="/library">Back to library</Link></Empty></div>
+  if (!found) return <div className="page"><Empty>Document not found. <Link to="/library">Back to library</Link></Empty></div>
+  if (!doc) return <div className="page"><Empty>This document is for the {found.tracks.join(' and ')} track. <Link to="/library">Back to library</Link></Empty></div>
   const author = user(doc.authorId)
   const area = state.areas.find(a => a.id === doc.areaId)
-  const related = state.docs.filter(d => d.id !== doc.id && d.areaId && d.areaId === doc.areaId).slice(0, 4)
+  const related = docsFor(state, me).filter(d => d.id !== doc.id && d.areaId && d.areaId === doc.areaId).slice(0, 4)
   const canEdit = can(me, 'doc.edit')
 
   const askAuthor = () => {

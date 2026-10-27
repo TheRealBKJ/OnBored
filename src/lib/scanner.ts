@@ -1,4 +1,4 @@
-import type { RepoScan, ScanFile, StarterTask } from './types'
+import type { CodeArea, RepoScan, ScanFile, StarterTask } from './types'
 import { now, uid } from './store'
 
 /**
@@ -34,7 +34,8 @@ const isTestPath = (p: string) => /(^|\/)(tests?|__tests__|spec)(\/|$)|[._-](tes
 
 function baseName(p: string) {
   const f = p.split('/').pop() ?? p
-  return f.replace(/\.(test|spec)(?=\.)/, '').replace(/_test(?=\.go$)/, '').replace(/^test_/, '').replace(/\.[^.]+$/, '')
+  // foo.test.ts, foo_test.go, foo_test.py, foo-test.js, foo_spec.rb and test_foo.py all name foo
+  return f.replace(/[._-](test|spec)(?=\.[^.]+$)/i, '').replace(/^test_/i, '').replace(/\.[^.]+$/, '')
 }
 
 function task(partial: Omit<StarterTask, 'id' | 'status' | 'createdAt' | 'source'>): StarterTask {
@@ -177,7 +178,7 @@ export async function scanFolder(list: FileList, onProgress?: (n: number, total:
 
 /** Scan a public GitHub repo: full tree, plus contents of up to `maxReads` source files. */
 export async function scanGitHub(input: string, onProgress?: (msg: string) => void, maxReads = 60): Promise<RepoScan> {
-  const m = input.trim().replace(/\.git$/, '').match(/(?:github\.com\/)?([\w.-]+)\/([\w.-]+)/)
+  const m = input.trim().replace(/\.git$/, '').match(/^(?:https?:\/\/)?(?:www\.)?(?:github\.com\/)?([\w.-]+)\/([\w.-]+)/i)
   if (!m) throw new Error('Use the form owner/repo or a github.com URL.')
   const [, owner, repo] = m
   onProgress?.('Fetching repo info...')
@@ -250,4 +251,18 @@ export function buildTree(files: ScanFile[]): TreeNode {
   }
   sort(root)
   return root
+}
+
+/** True when `file` is `dir` itself or sits somewhere under it (so `src/lib` does not match `src/library`). */
+export function inFolder(file: string, dir: string) {
+  const d = dir.replace(/\/+$/, '')
+  return file === d || file.startsWith(d + '/')
+}
+
+/** The most specific area whose path contains `file`. */
+export function areaForPath(areas: CodeArea[], file?: string) {
+  if (!file) return undefined
+  return areas
+    .filter(a => a.path && inFolder(file, a.path))
+    .sort((a, b) => b.path.length - a.path.length)[0]?.id
 }

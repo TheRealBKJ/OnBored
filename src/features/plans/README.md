@@ -31,7 +31,7 @@ Routes: `/plans` (index, split by role) and `/plans/:id` (detail, shared, gated 
 - Progress is computed by `planProgress` in `lib/selectors.ts`. A `task` step counts as done when its task's status is `done`, so seniors approving work moves the hire's plan forward automatically.
 - Copying a plan clones its phases and gives every phase and item a fresh id, so progress on the original never leaks into the copy.
 
-## Tests (10)
+## Tests (11)
 
 - The hire lands straight in their plan, and can tick and untick steps.
 - Task steps can't be ticked by hand.
@@ -40,6 +40,7 @@ Routes: `/plans` (index, split by role) and `/plans/:id` (detail, shared, gated 
 - Creating a plan from a template, including fresh ids and assignment.
 - Adding a meet step and a phase.
 - Switching which hire's progress is shown.
+- The progress view follows assignees being added or removed.
 - Delete-with-confirm.
 - Not found.
 

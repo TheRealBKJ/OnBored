@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore, uid } from '../../lib/store'
 import { openThread } from '../../lib/actions'
 import { can } from '../../lib/permissions'
+import { docsFor } from '../../lib/selectors'
 import type { CodeArea } from '../../lib/types'
 import { Avatar, Difficulty, Icon, KindBadge } from '../../components/ui'
 import { AreaEditor } from './AreaEditor'
@@ -15,6 +16,7 @@ export function AreaMap() {
   const [params, setParams] = useSearchParams()
   const selId = params.get('area') ?? state.areas[0]?.id
   const sel = state.areas.find(a => a.id === selId)
+  const visibleDocs = docsFor(state, me)
   const [editing, setEditing] = useState<CodeArea | null>(null)
   const canEdit = can(me, 'area.edit')
 
@@ -52,7 +54,7 @@ export function AreaMap() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {areas.map(a => {
                   const tasks = state.tasks.filter(t => t.areaId === a.id && t.status !== 'done').length
-                  const docs = state.docs.filter(d => d.areaId === a.id).length
+                  const docs = visibleDocs.filter(d => d.areaId === a.id).length
                   const role = !sel || a.id === sel.id ? '' : sel.dependsOn.includes(a.id) ? 'depends on' : a.dependsOn.includes(sel.id) ? 'uses it' : ''
                   return (
                     <button key={a.id} onClick={() => select(a.id)}
@@ -104,8 +106,8 @@ export function AreaMap() {
 }
 
 function AreaLinks({ area }: { area: CodeArea }) {
-  const { state } = useStore()
-  const docs = state.docs.filter(d => d.areaId === area.id)
+  const { state, me } = useStore()
+  const docs = docsFor(state, me).filter(d => d.areaId === area.id)
   const tasks = state.tasks.filter(t => t.areaId === area.id && t.status !== 'done')
   return (
     <>

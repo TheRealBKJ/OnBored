@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { currentPath, renderApp, savedState, SENIOR } from '../../test/render'
+import { currentPath, makeState, renderApp, savedState, SENIOR, NEW_HIRE, INTERN } from '../../test/render'
 
 const list = () => within(screen.getByTestId('doc-list') as HTMLElement)
 
@@ -65,15 +65,48 @@ describe('Library', () => {
 })
 
 describe('DocDetail', () => {
-  it('shows the question, decision and sources, and counts a hire\'s read', () => {
-    const before = renderApp('/library/doc-adr7')
+  it('shows the question, decision and sources', () => {
+    renderApp('/library/doc-adr7')
     expect(screen.getByRole('heading', { name: /ADR-007/ })).toBeInTheDocument()
     expect(screen.getByText('THE QUESTION')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Decision' })).toBeInTheDocument()
-    before.unmount()
-    const views = savedState().docs.find(d => d.id === 'doc-adr7')!.views
-    renderApp('/library/doc-adr7', { tweak: s => { s.docs.find(d => d.id === 'doc-adr7')!.views = views } })
-    expect(savedState().docs.find(d => d.id === 'doc-adr7')!.views).toBe(views! + 1)
+  })
+
+  it('counts each hire\'s read once, however often they open it', async () => {
+    const adr7 = () => savedState().docs.find(d => d.id === 'doc-adr7')!
+    const seeded = makeState().docs.find(d => d.id === 'doc-adr7')!.views!
+    const { user } = renderApp('/library/doc-adr7')
+    expect(adr7()).toMatchObject({ views: seeded + 1, readBy: [NEW_HIRE] })
+    await user.click(screen.getByRole('link', { name: '← Library' }))
+    await user.click(within(screen.getByTestId('doc-list')).getByRole('link', { name: /ADR-007/ }))
+    expect(adr7().views).toBe(seeded + 1)
+    await user.selectOptions(screen.getByDisplayValue('Sam Rivera'), 'Alex Kim')
+    await user.click(within(document.querySelector('aside.sidebar') as HTMLElement).getByRole('link', { name: 'Library' }))
+    await user.click(within(screen.getByTestId('doc-list')).getByRole('link', { name: /ADR-007/ }))
+    expect(adr7()).toMatchObject({ views: seeded + 2, readBy: [NEW_HIRE, INTERN] })
+  })
+
+  it('does not open a doc restricted to another track, or count it', () => {
+    renderApp('/library/doc-adr12', { as: INTERN })
+    expect(screen.getByText(/This document is for the Backend track/)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /ADR-012/ })).not.toBeInTheDocument()
+    expect(savedState().docs.find(d => d.id === 'doc-adr12')!.readBy).toBeUndefined()
+  })
+
+  it('keeps source links when a senior edits the sources', async () => {
+    const { user } = renderApp('/library/doc-adr7', { as: SENIOR, tweak: s => {
+      s.docs.find(d => d.id === 'doc-adr7')!.sources = [{ label: 'RFC 31', url: 'https://example.com/rfc31' }, { label: 'Postmortm' }]
+    } })
+    await user.click(screen.getByRole('button', { name: 'Edit' }))
+    const box = screen.getByLabelText(/Sources/) as HTMLTextAreaElement
+    expect(box.value).toBe('RFC 31 https://example.com/rfc31\nPostmortm')
+    await user.clear(box)
+    await user.type(box, 'RFC 31 https://example.com/rfc31{Enter}Postmortem{Enter}https://example.com/pr/9')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(savedState().docs.find(d => d.id === 'doc-adr7')!.sources).toEqual([
+      { label: 'RFC 31', url: 'https://example.com/rfc31' }, { label: 'Postmortem' }, { label: 'https://example.com/pr/9', url: 'https://example.com/pr/9' },
+    ])
+    expect(screen.getByRole('link', { name: 'RFC 31' })).toHaveAttribute('href', 'https://example.com/rfc31')
   })
 
   it('does not count a senior\'s read', () => {

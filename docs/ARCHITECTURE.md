@@ -69,5 +69,5 @@ Tailwind v4 with tokens in `src/index.css`. See `components/README.md`.
 
 - `npm test` runs everything (Vitest + jsdom + Testing Library).
 - Feature tests render the **whole app** with `renderApp(path, { as, tweak })` from `src/test/render.tsx`. That gives real routing, the real store and real permissions, signed in as any user, with optional changes to the seed.
-- `savedState()` reads back what was persisted, so tests can assert on data as well as the DOM. `currentPath()` asserts on navigation.
+- `savedState()` flushes the store's batched save and reads back what was persisted, so tests can assert on data as well as the DOM. `currentPath()` asserts on navigation.
 - Each view is tested as both roles. When you add a capability, add a test that the other role does *not* get it.

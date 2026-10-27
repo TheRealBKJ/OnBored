@@ -1,11 +1,22 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, uid, now } from '../../lib/store'
-import type { Doc, DocKind } from '../../lib/types'
+import type { Doc, DocKind, DocSource } from '../../lib/types'
 import { Field, Icon, Modal } from '../../components/ui'
 import { TRACKS } from '../../lib/tracks'
 
 const MAX_FILE = 512 * 1024 // keeps localStorage healthy in the POC
+
+// One source per line as "label https://url" (or just a label, or just a URL), so editing keeps links.
+const sourcesToText = (sources: DocSource[] = []) =>
+  sources.map(s => (s.url && s.url !== s.label ? `${s.label} ${s.url}` : s.label)).join('\n')
+
+function parseSources(text: string): DocSource[] {
+  return text.split('\n').map(line => {
+    const m = line.match(/^(?:(.*?)\s+)?(https?:\/\/\S+)$/)
+    return m ? { label: m[1] || m[2], url: m[2] } : { label: line }
+  })
+}
 
 export function DocEditor({ onClose, existing, defaults }: { onClose: () => void; existing?: Doc; defaults?: Partial<Doc> }) {
   const { state, me, mutate } = useStore()
@@ -80,8 +91,8 @@ export function DocEditor({ onClose, existing, defaults }: { onClose: () => void
           <Field label="Alternatives considered (one per line)">
             <textarea className="textarea min-h-15" value={(d.alternatives ?? []).join('\n')} onChange={e => set('alternatives', e.target.value.split('\n'))} />
           </Field>
-          <Field label="Sources: design docs, tickets, PRs, postmortems (one per line)">
-            <textarea className="textarea min-h-15" value={(d.sources ?? []).map(s => s.label).join('\n')} onChange={e => set('sources', e.target.value.split('\n').map(label => ({ label })))} />
+          <Field label="Sources: design docs, tickets, PRs, postmortems (one per line, a URL at the end links it)">
+            <textarea className="textarea min-h-15" value={sourcesToText(d.sources)} onChange={e => set('sources', parseSources(e.target.value))} />
           </Field>
         </>
       )}

@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../../lib/store'
-import { nextUp, planProgress, plansFor } from '../../lib/selectors'
+import { docsFor, nextUp, planProgress, plansFor } from '../../lib/selectors'
 import { ITEM_ICON, itemHref } from '../../lib/planItems'
 import { AskWhy } from '../../components/AskWhy'
 import { Avatar, Difficulty, Empty, Icon, KindBadge, SourceBadge } from '../../components/ui'
@@ -10,11 +11,12 @@ export function NewHireHome() {
   const plans = plansFor(state, me)
   const plan = plans[0]
   const prog = plan ? planProgress(state, plan, me.id) : null
-  const day = me.startDate ? Math.max(1, Math.ceil((Date.now() - new Date(me.startDate).getTime()) / 86400000)) : 1
+  const [today] = useState(Date.now)
+  const day = me.startDate ? Math.max(1, Math.ceil((today - new Date(me.startDate).getTime()) / 86400000)) : 1
   const up = nextUp(state, me, 4)
   const myTasks = state.tasks.filter(t => t.assigneeId === me.id && t.status !== 'done')
   const suggested = state.tasks.filter(t => !t.assigneeId && t.status === 'open').slice(0, 3)
-  const whys = state.docs.filter(d => d.kind === 'why' || d.kind === 'decision').filter(d => !d.tracks.length || d.tracks.includes(me.track)).slice(0, 4)
+  const whys = docsFor(state, me).filter(d => d.kind === 'why' || d.kind === 'decision').slice(0, 4)
   const owners = [...new Set(state.areas.map(a => a.ownerId))].map(id => user(id)!).filter(Boolean)
 
   return (

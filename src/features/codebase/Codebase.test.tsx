@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { currentPath, renderApp, savedState, SENIOR, NEW_HIRE } from '../../test/render'
+import { currentPath, renderApp, savedState, SENIOR, NEW_HIRE, INTERN } from '../../test/render'
 
 const detail = () => within(document.querySelector('aside.card') as HTMLElement)
 const areaCard = (name: string) => screen.getAllByRole('button', { name: new RegExp(`^${name}`) })[0]
@@ -110,5 +110,42 @@ describe('Codebase scanner', () => {
     await user.type(screen.getByPlaceholderText(/public GitHub repo/), 'acme/private')
     await user.click(screen.getByRole('button', { name: 'Scan' }))
     await waitFor(() => expect(screen.getByText('Repo not found, or it is private.')).toBeInTheDocument())
+  })
+})
+
+describe('Codebase doc visibility', () => {
+  it('hides docs restricted to another track from a new engineer', () => {
+    renderApp('/codebase?area=a-dispatch', { as: INTERN }) // Frontend; ADR-012 is Backend-only
+    expect(detail().queryByRole('link', { name: /ADR-012/ })).not.toBeInTheDocument()
+  })
+
+  it('shows them to the hire on that track and to seniors', () => {
+    renderApp('/codebase?area=a-dispatch')
+    expect(detail().getByRole('link', { name: /ADR-012/ })).toBeInTheDocument()
+  })
+})
+
+describe('Scanner folders', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('accepts a www.github.com URL and filters by exact folder', async () => {
+    const json = (body: unknown) => Promise.resolve(new Response(JSON.stringify(body)))
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      if (url.endsWith('/repos/acme/app')) return json({ default_branch: 'main' })
+      if (url.includes('/git/trees/')) return json({ tree: [
+        { path: 'src/lib/a.ts', type: 'blob', size: 5 },
+        { path: 'src/library/b.ts', type: 'blob', size: 5 },
+      ] })
+      if (url.endsWith('a.ts')) return Promise.resolve(new Response('// TODO: in lib'))
+      if (url.endsWith('b.ts')) return Promise.resolve(new Response('// TODO: in library'))
+      return Promise.resolve(new Response('{}', { status: 404 }))
+    }))
+    const { user } = renderApp('/codebase?tab=scan')
+    await user.type(screen.getByPlaceholderText(/public GitHub repo/), 'https://www.github.com/acme/app')
+    await user.click(screen.getByRole('button', { name: 'Scan' }))
+    await screen.findByText('acme/app')
+    await user.click(screen.getByText('lib/'))
+    expect(screen.getByText('Resolve TODO: in lib')).toBeInTheDocument()
+    expect(screen.queryByText('Resolve TODO: in library')).not.toBeInTheDocument()
   })
 })

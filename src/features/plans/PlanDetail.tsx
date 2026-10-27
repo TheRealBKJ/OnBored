@@ -19,9 +19,11 @@ export function PlanDetail({ id: propId }: { id?: string }) {
   const canEdit = can(me, 'plan.edit')
   const canCheck = can(me, 'plan.checkOff')
   const viewsOthers = can(me, 'progress.viewOthers')
-  const [viewAs, setViewAs] = useState<string>(viewsOthers ? plan?.assigneeIds[0] ?? '' : me.id)
+  const [picked, setPicked] = useState('')
 
   if (!plan) return <div className="page"><Empty>Plan not found. <Link to="/plans">Back to plans</Link></Empty></div>
+  // Derived, not stored: follows assignees being added or removed.
+  const viewAs = !viewsOthers ? me.id : plan.assigneeIds.includes(picked) ? picked : plan.assigneeIds[0] ?? ''
   const prog = viewAs ? planProgress(state, plan, viewAs) : null
 
   const toggle = (item: PlanItem) => {
@@ -68,7 +70,7 @@ export function PlanDetail({ id: propId }: { id?: string }) {
           <span className="min-w-0 flex-1" />
           {plan.assigneeIds.length > 0 && (
             <label className="flex items-center gap-2 text-small text-muted">Showing progress for
-              <select className="select w-auto" value={viewAs} onChange={e => setViewAs(e.target.value)}>
+              <select className="select w-auto" value={viewAs} onChange={e => setPicked(e.target.value)}>
                 {plan.assigneeIds.map(id => <option key={id} value={id}>{user(id)?.name}</option>)}
               </select>
             </label>

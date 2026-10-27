@@ -5,12 +5,12 @@ Framework-light logic shared by every feature. None of these files render UI, ex
 | File | What it is | Tests |
 |---|---|---|
 | `types.ts` | The data model: `User`, `Doc`, `CodeArea`, `Plan`, `StarterTask`, `Thread`, `RepoScan`, `AppState`. | none |
-| `store.tsx` | `StoreProvider` and `useStore()`. State is loaded from localStorage (or the seed) and saved after every change. `mutate(fn)` clones the state, applies `fn` **synchronously** and replaces it, so code can create something and use its id on the next line. Also exports `uid`, `now`, `ago` and `STORAGE_KEY`. | `store.test.tsx` (5) |
+| `store.tsx` | `StoreProvider` and `useStore()`. State is loaded from localStorage (or the seed). Saves are batched: written 300 ms after the last change, and immediately when the page is hidden (`flushSave`), so typing in a form doesn't serialize everything per keystroke. `mutate(fn)` clones the state, applies `fn` **synchronously** and replaces it, so code can create something and use its id on the next line. Also exports `uid`, `now`, `ago` and `STORAGE_KEY`. | `store.test.tsx` (7) |
 | `permissions.ts` | **Who can do what.** `can(user, capability)`, `useCan()` and `forRole(user, { senior, new })`. See below. | `permissions.test.ts` (2) |
-| `selectors.ts` | Derived data: plan progress, next steps, plans and docs visible to a user, thread order, unread state, `newHires` and `seniors`. | `selectors.test.ts` (9) |
-| `actions.ts` | Multi-step state changes: `openThread` (reuses a thread with the same context), `captureWhy` (answer to doc), `markRead`. | `actions.test.ts` (5) |
+| `selectors.ts` | Derived data: plan progress, next steps, plans and docs visible to a user (`canSeeDoc` is the one track rule; use it or `docsFor` wherever docs are listed), thread order, unread state, `newHires` and `seniors`. | `selectors.test.ts` (9) |
+| `actions.ts` | Multi-step state changes: `openThread` (reuses a thread with the same context), `captureWhy` (answer to doc), `questionFor` and `threadArea` (shared with the Save-as-why form so both agree), `countRead` (once per reader), `markRead`. | `actions.test.ts` (8) |
 | `ask.ts` | Ask-why retrieval: tokenizer, weighted field search, and `answerWhy`, which declines to answer below a confidence threshold. | `ask.test.ts` (6) |
-| `scanner.ts` | Read-only repo scanner (local folder or public GitHub) plus `findTasks` heuristics (TODO/FIXME, untested files, debug output, `any`, missing READMEs) and `buildTree`. | `scanner.test.ts` (6) |
+| `scanner.ts` | Read-only repo scanner (local folder or public GitHub) plus `findTasks` heuristics (TODO/FIXME, untested files, debug output, `any`, missing READMEs) and `buildTree`, `inFolder` and `areaForPath`. | `scanner.test.ts` (10) |
 | `planItems.ts` | Icon and link target for each plan step type. | via feature tests |
 | `tracks.ts` | Tracks a plan or doc can target. | none |
 | `seed.ts` | Demo data for "Relay": 3 seniors, 2 hires, 8 areas, 7 docs, 5 tasks, 2 plans, 2 threads. Tests build on it, so changing seed values can break tests on purpose. | none |

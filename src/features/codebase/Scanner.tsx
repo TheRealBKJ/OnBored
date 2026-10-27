@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useStore, uid, ago } from '../../lib/store'
-import { scanFolder, scanGitHub, buildTree } from '../../lib/scanner'
+import { scanFolder, scanGitHub, buildTree, inFolder, areaForPath } from '../../lib/scanner'
 import { newHires } from '../../lib/selectors'
 import { can } from '../../lib/permissions'
 import type { TreeNode } from '../../lib/scanner'
@@ -74,14 +74,13 @@ function ScanResult({ scan, endorses }: { scan: RepoScan; endorses: boolean }) {
     return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([lang, n], i) => ({ lang, pct: n / total, color: LANG_COLORS[i] }))
   }, [scan.files])
 
-  const findings = scan.findings.filter(f => !selPath || f.file?.startsWith(selPath))
+  const findings = scan.findings.filter(f => !selPath || (f.file && inFolder(f.file, selPath)))
   const already = new Set(state.tasks.map(t => `${t.file}:${t.line}:${t.title}`))
-  const areaFor = (path?: string) => path ? state.areas.find(a => a.path && path.startsWith(a.path))?.id : undefined
 
   const add = (f: StarterTask) => {
     mutate(s => {
       s.tasks.unshift({
-        ...f, id: uid('t'), areaId: areaFor(f.file),
+        ...f, id: uid('t'), areaId: areaForPath(state.areas, f.file),
         // A senior adding a scan finding is endorsing it; a new engineer adding one is picking it up.
         source: endorses ? 'senior' : 'ai', recommendedById: endorses ? me.id : undefined,
         assigneeId: endorses ? assignTo || undefined : me.id, status: endorses ? 'open' : 'in_progress',

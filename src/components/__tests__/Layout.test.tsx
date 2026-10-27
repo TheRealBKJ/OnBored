@@ -19,6 +19,15 @@ describe('Layout', () => {
     expect(nav().getByRole('link', { name: 'Messages' })).not.toHaveTextContent(/\d/)
   })
 
+  it('closes the mobile menu after navigating', async () => {
+    const { user } = renderApp('/')
+    const sidebar = document.querySelector('aside.sidebar')!
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    expect(sidebar).toHaveClass('open')
+    await user.click(nav().getByRole('link', { name: 'Library' }))
+    expect(sidebar).not.toHaveClass('open')
+  })
+
   it('switches the demo user and returns home', async () => {
     const { user } = renderApp('/tasks')
     await user.selectOptions(screen.getByDisplayValue('Sam Rivera'), 'Priya Raman')

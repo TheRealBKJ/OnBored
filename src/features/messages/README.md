@@ -26,13 +26,13 @@ Routes: `/messages`, `/messages/:id`, `/messages?to=:userId` (opens the direct t
 - `state.reads[userId]`: one `threadId:lastMessageId` marker per thread. A thread is unread when its last message is from someone else and that marker is missing (`isUnread` in `lib/selectors.ts`).
 - Save as why calls `captureWhy`. It creates a `kind: 'why'` doc authored by the senior, infers the area from the thread's context, and links the doc and the message both ways.
 
-## Tests (9)
+## Tests (11)
 
 - Opening a thread marks it read.
 - Context and saved-why links.
 - Enter sends; blank messages are not sent.
 - New message.
-- `?to=` prefills the recipient, or jumps to the existing thread.
+- `?to=` prefills the recipient, or jumps to the existing thread; cancelling clears the URL.
 - A senior saves an answer as a why record (fields prefilled, tags, area inferred).
 - Hires don't get Save as why.
 

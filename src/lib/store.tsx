@@ -26,19 +26,41 @@ interface Store {
 
 const Ctx = createContext<Store | null>(null)
 
+// Saving serializes the whole state, so batch it: typing in a form saves once it pauses, not per keystroke.
+const SAVE_DELAY = 300
+let pending: AppState | null = null
+let timer: ReturnType<typeof setTimeout> | undefined
+
+function scheduleSave(state: AppState) {
+  pending = state
+  clearTimeout(timer)
+  timer = setTimeout(flushSave, SAVE_DELAY)
+}
+
+/** Write any pending state to localStorage now. Runs on page hide and unmount; tests call it before reading storage. */
+export function flushSave() {
+  clearTimeout(timer)
+  if (!pending) return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(pending))
+  } catch {
+    // quota or private mode; state still lives in memory
+  }
+  pending = null
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(load)
   // Latest state, updated synchronously so callers can read ids created inside `mutate`
   // (e.g. open a thread, then navigate to it) and back-to-back mutates compose.
   const latest = useRef(state)
 
+  useEffect(() => scheduleSave(state), [state])
+
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-    } catch {
-      // quota or private mode; state still lives in memory
-    }
-  }, [state])
+    window.addEventListener('pagehide', flushSave)
+    return () => { window.removeEventListener('pagehide', flushSave); flushSave() }
+  }, [])
 
   const mutate = useCallback((fn: (draft: AppState) => void) => {
     const draft = structuredClone(latest.current)

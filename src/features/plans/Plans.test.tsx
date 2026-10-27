@@ -79,6 +79,19 @@ describe('Plans (senior)', () => {
     expect(screen.getByText('0 of 11 done')).toBeInTheDocument()
   })
 
+  it('keeps the progress view on a current assignee as assignees change', async () => {
+    const { user } = renderApp('/plans/p-backend', { as: SENIOR, tweak: s => { s.plans.find(p => p.id === 'p-backend')!.assigneeIds = [] } })
+    expect(screen.queryByText(/of 11 done/)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Sam Rivera' }))
+    expect(screen.getByText('5 of 11 done')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Alex Kim' }))
+    await user.selectOptions(screen.getByLabelText(/Showing progress for/), 'Alex Kim')
+    expect(screen.getByText('0 of 11 done')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Alex Kim' })) // unassign the person being viewed
+    expect(screen.getByText('5 of 11 done')).toBeInTheDocument()
+    expect(screen.getByLabelText(/Showing progress for/)).toHaveValue(NEW_HIRE)
+  })
+
   it('deletes a plan after confirming', async () => {
     const { user } = renderApp('/plans/p-frontend', { as: SENIOR })
     await user.click(screen.getByRole('button', { name: 'Edit plan' }))

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router-dom'
-import { StoreProvider, STORAGE_KEY } from '../lib/store'
+import { flushSave, StoreProvider, STORAGE_KEY } from '../lib/store'
 import { seed } from '../lib/seed'
 import { AppRoutes } from '../routes'
 import type { AppState } from '../lib/types'
@@ -42,6 +42,7 @@ export function renderApp(path = '/', { as = NEW_HIRE, tweak }: { as?: string; t
 
 /** The store persists every change; read it back to assert on data, not just the DOM. */
 export function savedState(): AppState {
+  flushSave()
   return JSON.parse(localStorage.getItem(STORAGE_KEY)!)
 }
 

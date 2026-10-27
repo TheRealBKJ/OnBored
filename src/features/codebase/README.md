@@ -17,17 +17,17 @@ Two tabs at `/codebase`:
 
 | | New engineer | Senior engineer |
 |---|---|---|
-| Map | Read-only. **Ask** messages the area owner, in a thread tied to the area. | **Add area** and **Edit** (`area.edit`). |
+| Map | Read-only. **Ask** messages the area owner, in a thread tied to the area. Doc counts and links only include docs for their track. | **Add area** and **Edit** (`area.edit`). |
 | Scan findings | **Pick up**: the finding becomes a task assigned to them, in progress, source "Found by scan". | **Recommend**, optionally with an assignee (`scan.recommend`): it becomes an open task with source "Senior pick" and them as recommender. |
 
 ## Data
 
 - `state.areas`: edited here. Tasks and docs point at areas through `areaId`.
 - `state.scan`: the last scan result (one at a time in the POC).
-- Adding a finding pushes to `state.tasks`. The task's area is inferred from the file path (`area.path` prefix).
+- Adding a finding pushes to `state.tasks`. The task's area is the most specific area whose path contains the file (`areaForPath` in `lib/scanner.ts`; `services/billing-v2` is not `services/billing`).
 - The scanner (`lib/scanner.ts`) runs entirely in the browser. GitHub scans use the public API: 60 requests an hour without a token, and the tree plus up to 60 files are read.
 
-## Tests (11)
+## Tests (14)
 
 - Grouping and default selection.
 - `?area=` deep link with docs and tasks.
@@ -38,6 +38,8 @@ Two tabs at `/codebase`:
 - GitHub scan end to end (ignored paths, README, pick-up).
 - A senior recommending a finding endorses it.
 - GitHub error message.
+- Another track's docs are hidden from a hire's area links.
+- `www.github.com` URLs, and folder filtering by whole path segment (`src/lib` is not `src/library`).
 
 ## Next
 

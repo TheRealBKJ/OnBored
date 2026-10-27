@@ -1,22 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../lib/store'
-import { captureWhy } from '../../lib/actions'
+import { captureWhy, questionFor, threadArea } from '../../lib/actions'
 import type { Message, Thread } from '../../lib/types'
 import { Field, Modal } from '../../components/ui'
 
 export function SaveWhyModal({ thread, message, onClose }: { thread: Thread; message: Message; onClose: () => void }) {
   const { state, mutate } = useStore()
   const nav = useNavigate()
-  const idx = thread.messages.indexOf(message)
-  const asked = [...thread.messages.slice(0, idx)].reverse().find(x => x.fromId !== message.fromId)
+  const asked = questionFor(thread, message)
   const [question, setQuestion] = useState(asked?.body ?? '')
   const [title, setTitle] = useState(asked?.body.slice(0, 80) ?? thread.subject)
   const [body, setBody] = useState(message.body)
   const [tags, setTags] = useState('')
-  const defaultArea = thread.context?.kind === 'area' ? thread.context.id
-    : thread.context?.kind === 'task' ? state.tasks.find(t => t.id === thread.context!.id)?.areaId : undefined
-  const [areaId, setAreaId] = useState(defaultArea ?? '')
+  const [areaId, setAreaId] = useState(threadArea(state, thread) ?? '')
 
   const save = () => {
     let docId: string | undefined

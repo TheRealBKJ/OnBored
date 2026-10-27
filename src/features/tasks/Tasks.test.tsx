@@ -67,3 +67,24 @@ describe('Tasks board', () => {
     expect(savedState().tasks.some(t => t.id === created.id)).toBe(false)
   })
 })
+
+describe('Task status', () => {
+  const status = () => within(screen.getByRole('dialog', { name: 'Starter task' })).getByDisplayValue('In progress')
+  const options = (el: HTMLElement) => within(el).getAllByRole('option').map(o => o.textContent)
+
+  it('does not let the assignee mark their own task done', () => {
+    renderApp('/tasks?open=t-1') // Sam's, in progress
+    expect(status()).toBeEnabled()
+    expect(options(status())).toEqual(['Up for grabs', 'In progress', 'In review'])
+  })
+
+  it('locks the status once a senior has approved it', () => {
+    renderApp('/tasks?open=t-1', { tweak: s => { s.tasks.find(t => t.id === 't-1')!.status = 'done' } })
+    expect(within(screen.getByRole('dialog', { name: 'Starter task' })).getByDisplayValue('Done')).toBeDisabled()
+  })
+
+  it('lets a senior set any status', () => {
+    renderApp('/tasks?open=t-1', { as: SENIOR })
+    expect(options(status())).toContain('Done')
+  })
+})

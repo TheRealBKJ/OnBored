@@ -37,7 +37,10 @@ export interface Doc {
   alternatives?: string[]
   sources?: DocSource[]
   capturedFromThreadId?: string
+  /** Times read by new engineers; seeded docs start with a historical count. */
   views?: number
+  /** New engineers already counted in `views`. */
+  readBy?: string[]
 }
 
 export interface CodeArea {

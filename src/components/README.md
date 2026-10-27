@@ -4,7 +4,7 @@ Used by more than one feature. Code used by a single feature belongs in that fea
 
 | File | What it is | Tests |
 |---|---|---|
-| `Layout.tsx` | App shell: sidebar nav (labels come from `forRole`), unread count on Messages, the demo "Viewing as" user switcher, Reset demo data, and the mobile top bar. Renders the page through `<Outlet />`. | `__tests__/Layout.test.tsx` (4): nav per role, unread badge, switching user goes home, reset needs confirm |
+| `Layout.tsx` | App shell: sidebar nav (labels come from `forRole`), unread count on Messages, the demo "Viewing as" user switcher, Reset demo data, and the mobile top bar. Renders the page through `<Outlet />`. | `__tests__/Layout.test.tsx` (5): nav per role, unread badge, mobile menu closes on navigation, switching user goes home, reset needs confirm |
 | `AskWhy.tsx` | "Ask why" box. Searches the Library (`lib/ask.ts`) and answers only from team records, always with citations. When nothing matches it says so instead of guessing. New engineers (`ask.routeToOwner`) can send the question to the closest area owner or a senior on their track. | `__tests__/AskWhy.test.tsx` (5): cited answer, example chips, routing an unanswered question, clear, seniors don't get routing |
 | `ui.tsx` | Primitives: `Avatar`, `Modal` (Escape, backdrop click and the close button all close it), `Field`, `Progress`, `Difficulty`, `SourceBadge`, `KindBadge`, `Empty`, `Icon` (inline SVG paths, no icon library). | `__tests__/ui.test.tsx` (6) |
 

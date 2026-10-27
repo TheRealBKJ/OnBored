@@ -49,7 +49,25 @@ describe('Messages', () => {
     expect(within(screen.getByRole('dialog', { name: 'New message' })).getByLabelText('To')).toHaveValue('u-dana')
   })
 
-  it('?to= jumps to an existing direct thread', () => {
+  it('?to= dialog closes on cancel and clears the URL', async () => {
+    const { user } = renderApp('/messages?to=u-dana')
+    await user.click(within(screen.getByRole('dialog', { name: 'New message' })).getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(currentPath()).toBe('/messages')
+  })
+
+  it('?to= sends to that person and lands on the new thread', async () => {
+    const { user } = renderApp('/messages?to=u-dana')
+    const dialog = within(screen.getByRole('dialog', { name: 'New message' }))
+    await user.type(dialog.getByLabelText('Message'), 'Quick question')
+    await user.click(dialog.getByRole('button', { name: 'Send' }))
+    const t = savedState().threads.at(-1)!
+    expect(t.participantIds).toEqual([NEW_HIRE, 'u-dana'])
+    expect(currentPath()).toBe(`/messages/${t.id}`)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+    it('?to= jumps to an existing direct thread', () => {
     renderApp('/messages?to=u-dana', { tweak: s => { s.threads.push({ id: 'th-dm', participantIds: [NEW_HIRE, 'u-dana'], subject: 'hi', messages: [] }) } })
     expect(currentPath()).toBe('/messages/th-dm')
   })

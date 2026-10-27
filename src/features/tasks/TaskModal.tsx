@@ -19,6 +19,10 @@ export function TaskModal({ id, onClose }: { id: string; onClose: () => void }) 
   const area = state.areas.find(a => a.id === t.areaId)
   const helper = t.recommendedById ?? area?.ownerId ?? seniors(state)[0].id
 
+  // Only a senior can mark a task done (via Approve); the assignee moves it between the other columns.
+  const canSetStatus = can(me, 'task.edit') || (t.assigneeId === me.id && t.status !== 'done')
+  const statuses = can(me, 'task.edit') ? COLS : COLS.filter(c => c.s !== 'done' || t.status === 'done')
+
   const set = (fn: (x: StarterTask) => void) => mutate(s => { const x = s.tasks.find(x => x.id === id); if (x) fn(x) })
   const ask = () => {
     let tid = ''
@@ -56,8 +60,8 @@ export function TaskModal({ id, onClose }: { id: string; onClose: () => void }) 
         </div>
         <div>
           <span className="label">Status</span>
-          <select className="select" value={t.status} disabled={!can(me, 'task.edit') && t.assigneeId !== me.id} onChange={e => set(x => { x.status = e.target.value as TaskStatus })}>
-            {COLS.map(c => <option key={c.s} value={c.s}>{c.label}</option>)}
+          <select className="select" value={t.status} disabled={!canSetStatus} onChange={e => set(x => { x.status = e.target.value as TaskStatus })}>
+            {statuses.map(c => <option key={c.s} value={c.s}>{c.label}</option>)}
           </select>
         </div>
       </div>

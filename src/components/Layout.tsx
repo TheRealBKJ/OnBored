@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
 import { useStore } from '../lib/store'
 import { newHires, seniors, unreadCount } from '../lib/selectors'
 import { forRole } from '../lib/permissions'
@@ -8,13 +7,14 @@ import { Avatar, Icon } from './ui'
 
 export function Layout() {
   const { state, me, mutate, reset } = useStore()
-  const [open, setOpen] = useState(false)
   const loc = useLocation()
   const nav = useNavigate()
   const unread = unreadCount(state, me.id)
   const label = (senior: string, newHire: string) => forRole(me, { senior, new: newHire })
 
-  useEffect(() => setOpen(false), [loc.pathname])
+  // The mobile menu remembers the page it was opened on, so navigating anywhere closes it.
+  const [openOn, setOpenOn] = useState<string | null>(null)
+  const open = openOn === loc.pathname
 
   const links = [
     { to: '/', icon: 'home', label: label('Dashboard', 'Home'), end: true },
@@ -67,7 +67,7 @@ export function Layout() {
 
       <div className="main">
         <div className="mobile-bar">
-          <button className="btn ghost sm" onClick={() => setOpen(o => !o)} aria-label="Menu"><Icon name="menu" /></button>
+          <button className="btn ghost sm" onClick={() => setOpenOn(open ? null : loc.pathname)} aria-label="Menu"><Icon name="menu" /></button>
           <strong>Layers</strong>
           <span className="min-w-0 flex-1" />
           <Avatar user={me} size={26} />

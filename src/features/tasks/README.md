@@ -27,7 +27,7 @@ When a task reaches `done`, any plan step that points at it counts as complete (
 |---|---|---|
 | Default filter | Mine + unassigned | Everyone's tasks |
 | Actions | **Pick this up** (`task.pickUp`), **Submit for review** on their own task, **Ask {helper}** | **Recommend a task** (`task.recommend`), **Edit** and **Delete** (`task.edit`), set assignee (`task.assign`), **Approve** (`task.approve`) |
-| Status select | Only on their own tasks | Always |
+| Status select | Only on their own tasks, and without **Done**: only a senior's **Approve** finishes a task. Locked once done. | Always, any column |
 
 **Ask {helper}** messages the recommender, or else the area owner, or else any senior. It reuses an existing thread about the same task.
 
@@ -35,7 +35,7 @@ When a task reaches `done`, any plan step that points at it counts as complete (
 
 `state.tasks` is created, edited, assigned, moved and deleted here. Scan findings also land here, from `features/codebase`.
 
-## Tests (6)
+## Tests (9)
 
 - The hire's default view hides other people's tasks.
 - Source and owner filters.
@@ -43,6 +43,7 @@ When a task reaches `done`, any plan step that points at it counts as complete (
 - Ask reuses the existing thread.
 - Status is locked on other people's tasks.
 - A senior recommends, edits and deletes a task.
+- The assignee's status select has no Done, and locks once a task is approved; seniors get every column.
 
 ## Next
 

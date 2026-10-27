@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { captureWhy, markRead, openThread } from '../actions'
+import { captureWhy, countRead, markRead, openThread, threadArea } from '../actions'
 import { makeState, NEW_HIRE, SENIOR } from '../../test/render'
 
 describe('openThread', () => {
@@ -35,6 +35,23 @@ describe('captureWhy', () => {
     expect(s.threads.find(t => t.id === 'th-2')!.messages[1].savedDocId).toBe(docId)
   })
 
+  it('saves with no area when the senior picks None', () => {
+    const s = makeState()
+    captureWhy(s, 'th-2', 'm-4', { areaId: undefined })
+    expect(s.docs[0].areaId).toBeUndefined()
+  })
+
+  it('takes the area from a doc, task or area context', () => {
+    const s = makeState()
+    const t = s.threads[0]
+    t.context = { kind: 'doc', id: 'doc-adr7' }
+    expect(threadArea(s, t)).toBe('a-gateway')
+    t.context = { kind: 'area', id: 'a-db' }
+    expect(threadArea(s, t)).toBe('a-db')
+    t.context = undefined
+    expect(threadArea(s, t)).toBeUndefined()
+  })
+
   it('does nothing for an unknown message', () => {
     const s = makeState()
     expect(captureWhy(s, 'th-2', 'nope', {})).toBeUndefined()
@@ -50,5 +67,19 @@ describe('markRead', () => {
     t.messages.push({ id: 'm-new', fromId: SENIOR, body: 'x', at: new Date().toISOString() })
     markRead(s, NEW_HIRE, t)
     expect(s.reads[NEW_HIRE]).toEqual(['th-2:m-new'])
+  })
+})
+
+describe('countRead', () => {
+  it('counts each reader once', () => {
+    const s = makeState()
+    const views = () => s.docs.find(d => d.id === 'doc-setup')!.views
+    const start = views()!
+    countRead(s, 'doc-setup', NEW_HIRE)
+    countRead(s, 'doc-setup', NEW_HIRE)
+    expect(views()).toBe(start + 1)
+    countRead(s, 'doc-setup', 'u-alex')
+    expect(views()).toBe(start + 2)
+    countRead(s, 'nope', NEW_HIRE) // unknown doc is a no-op
   })
 })

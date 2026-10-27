@@ -1,4 +1,4 @@
-import type { AppState, Plan, PlanItem, Thread, User } from './types'
+import type { AppState, Doc, Plan, PlanItem, Thread, User } from './types'
 import { can } from './permissions'
 
 export const newHires = (state: AppState) => state.users.filter(u => u.role === 'new')
@@ -54,6 +54,11 @@ export function unreadCount(state: AppState, userId: string) {
   return threadsFor(state, userId).filter(t => isUnread(state, t, userId)).length
 }
 
+/** Docs restricted to other tracks are hidden from a new engineer everywhere, not just in the Library. */
+export function canSeeDoc(user: User, doc: Doc) {
+  return can(user, 'doc.viewAllTracks') || !doc.tracks.length || doc.tracks.includes(user.track)
+}
+
 export function docsFor(state: AppState, user: User) {
-  return state.docs.filter(d => can(user, 'doc.viewAllTracks') || !d.tracks.length || d.tracks.includes(user.track))
+  return state.docs.filter(d => canSeeDoc(user, d))
 }

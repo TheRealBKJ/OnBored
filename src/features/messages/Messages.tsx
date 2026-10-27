@@ -17,15 +17,17 @@ export function Messages() {
   const active = threads.find(t => t.id === id) ?? (id ? undefined : threads[0])
   const [composing, setComposing] = useState<{ to?: string } | null>(null)
 
-  // /messages?to=<userId> opens (or starts) a direct thread with that person.
+  // /messages?to=<userId> jumps to the direct thread with that person, or starts one.
+  const to = params.get('to')
+  const directId = to ? state.threads.find(t => !t.context && t.participantIds.includes(me.id) && t.participantIds.includes(to))?.id : undefined
   useEffect(() => {
-    const to = params.get('to')
-    if (!to) return
-    const existing = state.threads.find(t => !t.context && t.participantIds.includes(me.id) && t.participantIds.includes(to))
-    if (existing) { nav(`/messages/${existing.id}`, { replace: true }); return }
-    setParams({}, { replace: true })
-    setComposing({ to })
-  }, [params, state.threads, me.id, nav, setParams])
+    if (directId) nav(`/messages/${directId}`, { replace: true })
+  }, [directId, nav])
+  const compose = composing ?? (to && !directId ? { to } : null)
+  const closeCompose = () => {
+    setComposing(null)
+    if (to) setParams({}, { replace: true })
+  }
 
   useEffect(() => {
     if (active && isUnread(state, active, me.id)) mutate(s => markRead(s, me.id, active))
@@ -59,7 +61,7 @@ export function Messages() {
         </div>
         {active ? <ThreadView thread={active} key={active.id} /> : <div className="chat-main"><Empty>Select a conversation.</Empty></div>}
       </div>
-      {composing && <ComposeModal initialTo={composing.to} onClose={() => setComposing(null)} />}
+      {compose && <ComposeModal initialTo={compose.to} onClose={closeCompose} />}
     </div>
   )
 }
